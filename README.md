@@ -61,12 +61,12 @@ The NuGet package files are added along side the source with the latest GitHub r
 	});
 	```
 
-For information on the clients, dependency injection, response processing and more see the [documentation](https://jkorf.github.io/GateIo.Net), or have a look at the examples [here](https://github.com/JKorf/GateIo.Net/tree/main/Examples) or [here](https://github.com/JKorf/CryptoExchange.Net/tree/master/Examples).
+For information on the clients, dependency injection, response processing and more see the [documentation](https://cryptoexchange.jkorf.dev?library=GateIo.Net), or have a look at the examples [here](https://github.com/JKorf/GateIo.Net/tree/main/Examples) or [here](https://github.com/JKorf/CryptoExchange.Net/tree/master/Examples).
 
 ## CryptoExchange.Net
 GateIo.Net is based on the [CryptoExchange.Net](https://github.com/JKorf/CryptoExchange.Net) base library. Other exchange API implementations based on the CryptoExchange.Net base library are available and follow the same logic.
 
-CryptoExchange.Net also allows for [easy access to different exchange API's](https://jkorf.github.io/CryptoExchange.Net#idocs_shared).
+CryptoExchange.Net also allows for [easy access to different exchange API's](https://cryptoexchange.jkorf.dev/client-libs/shared).
 
 |Exchange|Repository|Nuget|
 |--|--|--|
@@ -166,6 +166,13 @@ Make a one time donation in a crypto currency of your choice. If you prefer to d
 Alternatively, sponsor me on Github using [Github Sponsors](https://github.com/sponsors/JKorf). 
 
 ## Release notes
+* Version 2.1.0 - 02 Jun 2025
+    * Updated CryptoExchange.Net to version 9.1.0, see https://github.com/JKorf/CryptoExchange.Net/releases/
+    * Added (I)GateIoUserClientProvider allowing for easy client management when handling multiple users
+    * Added restClient.PerpetualFuturesApi.Account.SetMarginModeAsync endpoint
+    * Added OneSecond value to KlineInterval enum
+    * Added socketClient.PerpetualFuturesApi.SubscribeToOrderBookV2UpdatesAsync subscription
+
 * Version 2.0.0 - 13 May 2025
     * Updated CryptoExchange.Net to version 9.0.0, see https://github.com/JKorf/CryptoExchange.Net/releases/
     * Added support for Native AOT compilation

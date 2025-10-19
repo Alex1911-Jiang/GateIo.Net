@@ -8,7 +8,7 @@ using GateIo.Net.Interfaces.Clients.SpotApi;
 namespace GateIo.Net.Interfaces.Clients
 {
     /// <summary>
-    /// Client for accessing the Gate.io Rest API. 
+    /// Client for accessing the Gate Rest API.
     /// </summary>
     public interface IGateIoRestClient : IRestClient
     {
@@ -27,6 +27,11 @@ namespace GateIo.Net.Interfaces.Clients
         /// </summary>
         /// <see cref="IGateIoRestClientRebateApi"/>
         IGateIoRestClientRebateApi RebateApi { get; }
+        /// <summary>
+        /// Alpha API endpoints
+        /// </summary>
+        /// <see cref="IGateIoRestClientAlphaApi"/>
+        IGateIoRestClientAlphaApi AlphaApi { get; }
 
         /// <summary>
         /// Update specific options

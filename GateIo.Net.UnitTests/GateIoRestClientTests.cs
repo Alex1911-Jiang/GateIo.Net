@@ -4,14 +4,13 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.Net.Http;
 using GateIo.Net.Clients;
-using GateIo.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using GateIo.Net.Interfaces.Clients;
 using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.Converters.SystemTextJson;
 
-namespace Gate.io.Net.UnitTests
+namespace GateIo.Net.UnitTests
 {
     [TestFixture()]
     public class GateIoRestClientTests
@@ -50,6 +49,7 @@ namespace Gate.io.Net.UnitTests
 
         [Test]
         [TestCase(TradeEnvironmentNames.Live, "https://api.gateio.ws")]
+        [TestCase(TradeEnvironmentNames.Testnet, "https://api-testnet.gateapi.io")]
         [TestCase("", "https://api.gateio.ws")]
         public void TestConstructorEnvironments(string environmentName, string expected)
         {

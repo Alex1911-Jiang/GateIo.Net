@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Gate.io.Net.UnitTests
+namespace GateIo.Net.UnitTests
 {
     [TestFixture]
     public class RestRequestTests
@@ -150,6 +150,7 @@ namespace Gate.io.Net.UnitTests
             await tester.ValidateAsync(client => client.PerpetualFuturesApi.Account.GetLedgerAsync("usdt"), "GetLedger");
             await tester.ValidateAsync(client => client.PerpetualFuturesApi.Account.UpdatePositionModeAsync("usdt", true), "UpdatePositionMode");
             await tester.ValidateAsync(client => client.PerpetualFuturesApi.Account.GetTradingFeeAsync("usdt"), "GetTradingFee");
+            await tester.ValidateAsync(client => client.PerpetualFuturesApi.Account.SetMarginModeAsync("usdt", "BTC_USDT", MarginMode.Isolated), "SetMarginMode");
         }
 
         [Test]
@@ -215,6 +216,48 @@ namespace Gate.io.Net.UnitTests
             await tester.ValidateAsync(client => client.PerpetualFuturesApi.Trading.GetTriggerOrderAsync("usdt", 123), "GetTriggerOrder", ignoreProperties: new List<string> { "strategy_type" });
             await tester.ValidateAsync(client => client.PerpetualFuturesApi.Trading.CancelTriggerOrderAsync("usdt", 123), "CancelTriggerOrder", ignoreProperties: new List<string> { "strategy_type" });
             await tester.ValidateAsync(client => client.PerpetualFuturesApi.Trading.EditMultipleOrdersAsync("usdt", new[] { new GateIoPerpBatchEditRequest() }), "EditMultipleOrders");
+        }
+
+        [Test]
+        public async Task ValidateAlphaAccountCalls()
+        {
+            var client = new GateIoRestClient(opts =>
+            {
+                opts.AutoTimestamp = false;
+                opts.ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials("123", "456");
+            });
+            var tester = new RestRequestValidator<GateIoRestClient>(client, "Endpoints/Alpha/Account", "https://api.gateio.ws", IsAuthenticated);
+            await tester.ValidateAsync(client => client.AlphaApi.Account.GetAccountInfoAsync(), "GetAccountInfo");
+            await tester.ValidateAsync(client => client.AlphaApi.Account.GetLedgerAsync(), "GetLedger");
+        }
+
+        [Test]
+        public async Task ValidateAlphaExchangeDataCalls()
+        {
+            var client = new GateIoRestClient(opts =>
+            {
+                opts.AutoTimestamp = false;
+                opts.ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials("123", "456");
+            });
+            var tester = new RestRequestValidator<GateIoRestClient>(client, "Endpoints/Alpha/ExchangeData", "https://api.gateio.ws", IsAuthenticated);
+            await tester.ValidateAsync(client => client.AlphaApi.ExchangeData.GetAssetsAsync(), "GetAssets");
+            await tester.ValidateAsync(client => client.AlphaApi.ExchangeData.GetTickersAsync(), "GetTickers");
+        }
+
+
+        [Test]
+        public async Task ValidateAlphaTradeCalls()
+        {
+            var client = new GateIoRestClient(opts =>
+            {
+                opts.AutoTimestamp = false;
+                opts.ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials("123", "456");
+            });
+            var tester = new RestRequestValidator<GateIoRestClient>(client, "Endpoints/Alpha/Trading", "https://api.gateio.ws", IsAuthenticated);
+            await tester.ValidateAsync(client => client.AlphaApi.Trading.GetQuoteAsync("Asset", OrderSide.Buy, 10, GasMode.SmartMode), "GetQuote");
+            await tester.ValidateAsync(client => client.AlphaApi.Trading.PlaceOrderAsync("Asset", OrderSide.Buy, 10, GasMode.SmartMode, "123"), "PlaceOrder");
+            await tester.ValidateAsync(client => client.AlphaApi.Trading.GetOrdersAsync("Asset", OrderSide.Buy, AlphaOrderStatus.Successful), "GetOrders");
+            await tester.ValidateAsync(client => client.AlphaApi.Trading.GetOrderAsync("123"), "GetOrder");
         }
 
         private bool IsAuthenticated(WebCallResult result)

@@ -113,6 +113,9 @@ namespace GateIo.Net.Clients.SpotApi
         /// <inheritdoc />
         public async Task<WebCallResult<GateIoWithdrawal[]>> GetWithdrawalsAsync(
             string? asset = null,
+            string? withdrawalId = null,
+            string? assetClass = null,
+            string? withdrawClientOrderId = null,
             DateTime? startTime = null,
             DateTime? endTime = null,
             int? limit = null,
@@ -121,6 +124,9 @@ namespace GateIo.Net.Clients.SpotApi
         {
             var parameters = new ParameterCollection();
             parameters.AddOptional("currency", asset);
+            parameters.AddOptional("withdraw_id", withdrawalId);
+            parameters.AddOptional("asset_class", assetClass);
+            parameters.AddOptional("withdraw_order_id", withdrawClientOrderId);
             parameters.AddOptionalSeconds("from", startTime);
             parameters.AddOptionalSeconds("to", endTime);
             parameters.AddOptional("limit", limit);
@@ -615,6 +621,19 @@ namespace GateIo.Net.Clients.SpotApi
             parameters.AddOptional("currency_pair", symbol);
             var request = _definitions.GetOrCreate(HttpMethod.Get, "/api/v4/margin/accounts", GateIoExchange.RateLimiter.RestPrivate, 1, true);
             return await _baseClient.SendAsync<GateIoMarginAccount[]>(request, parameters, ct).ConfigureAwait(false);
+        }
+
+        #endregion
+
+        #region Get Margin Accounts
+
+        /// <inheritdoc />
+        public async Task<WebCallResult<GateIoIsolatedMarginAccount[]>> GetIsolatedMarginAccountsAsync(string? symbol = null, CancellationToken ct = default)
+        {
+            var parameters = new ParameterCollection();
+            parameters.AddOptional("currency_pair", symbol);
+            var request = _definitions.GetOrCreate(HttpMethod.Get, "/api/v4/margin/user/account", GateIoExchange.RateLimiter.RestPrivate, 1, true);
+            return await _baseClient.SendAsync<GateIoIsolatedMarginAccount[]>(request, parameters, ct).ConfigureAwait(false);
         }
 
         #endregion

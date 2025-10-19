@@ -11,7 +11,7 @@ using CryptoExchange.Net.Converters;
 namespace GateIo.Net
 {
     /// <summary>
-    /// Gate.io exchange information and configuration
+    /// Gate exchange information and configuration
     /// </summary>
     public static class GateIoExchange
     {
@@ -23,7 +23,7 @@ namespace GateIo.Net
         /// <summary>
         /// Exchange name
         /// </summary>
-        public static string DisplayName => "Gate.io";
+        public static string DisplayName => "Gate";
 
         /// <summary>
         /// Url to exchange image
@@ -33,14 +33,12 @@ namespace GateIo.Net
         /// <summary>
         /// Url to the main website
         /// </summary>
-        public static string Url { get; } = "https://www.gate.io";
+        public static string Url { get; } = "https://www.gate.com";
 
         /// <summary>
         /// Urls to the API documentation
         /// </summary>
-        public static string[] ApiDocsUrl { get; } = new[] {
-            "https://www.gate.io/docs/developers/apiv4/en/"
-            };
+        public static string[] ApiDocsUrl { get; } = ["https://www.gate.com/docs/developers/apiv4/en/"];
 
         /// <summary>
         /// Type of exchange
@@ -50,7 +48,7 @@ namespace GateIo.Net
         internal static JsonSerializerContext _serializerContext = JsonSerializerContextCache.GetOrCreate<GateIoSourceGenerationContext>();
 
         /// <summary>
-        /// Format a base and quote asset to a Gate.io recognized symbol 
+        /// Format a base and quote asset to a Gate recognized symbol
         /// </summary>
         /// <param name="baseAsset">Base asset</param>
         /// <param name="quoteAsset">Quote asset</param>
@@ -63,7 +61,7 @@ namespace GateIo.Net
         }
 
         /// <summary>
-        /// Rate limiter configuration for the Gate.io API
+        /// Rate limiter configuration for the Gate API
         /// </summary>
         public static GateIoRateLimiters RateLimiter { get; } = new GateIoRateLimiters();
     }
@@ -110,6 +108,8 @@ namespace GateIo.Net
                         .AddGuard(new RateLimitGuard(RateLimitGuard.PerApiKeyPerEndpoint, Array.Empty<IGuardFilter>(), 150, TimeSpan.FromSeconds(10), RateLimitWindowType.FixedAfterFirst)); // Uid limit of 150 request per 10 seconds
             RestOther = new RateLimitGate("Other")
                         .AddGuard(new RateLimitGuard(RateLimitGuard.PerApiKeyPerEndpoint, Array.Empty<IGuardFilter>(), 150, TimeSpan.FromSeconds(10), RateLimitWindowType.FixedAfterFirst)); // Uid limit of 150 request per 10 seconds
+            RestAlpha = new RateLimitGate("Alpha")
+                        .AddGuard(new RateLimitGuard(RateLimitGuard.PerApiKey, Array.Empty<IGuardFilter>(), 200, TimeSpan.FromSeconds(10), RateLimitWindowType.FixedAfterFirst)); // 200 requests per 10 seconds
 
             Public.RateLimitTriggered += (x) => RateLimitTriggered?.Invoke(x);
             Public.RateLimitUpdated += (x) => RateLimitUpdated?.Invoke(x);
@@ -129,6 +129,8 @@ namespace GateIo.Net
             RestPrivate.RateLimitUpdated += (x) => RateLimitUpdated?.Invoke(x);
             RestOther.RateLimitTriggered += (x) => RateLimitTriggered?.Invoke(x);
             RestOther.RateLimitUpdated += (x) => RateLimitUpdated?.Invoke(x);
+            RestAlpha.RateLimitTriggered += (x) => RateLimitTriggered?.Invoke(x);
+            RestAlpha.RateLimitUpdated += (x) => RateLimitUpdated?.Invoke(x);
         }
 
 
@@ -141,5 +143,6 @@ namespace GateIo.Net
         internal IRateLimitGate RestFuturesOther { get; private set; }
         internal IRateLimitGate RestPrivate { get; private set; }
         internal IRateLimitGate RestOther { get; private set; }
+        internal IRateLimitGate RestAlpha { get; private set; }
     }
 }

@@ -7,6 +7,15 @@ using System.Text.Json.Serialization;
 
 namespace GateIo.Net.Converters
 {
+    [JsonSerializable(typeof(GateIoAlphaAccount[]))]
+    [JsonSerializable(typeof(GateIoAlphaLedgerEntry[]))]
+    [JsonSerializable(typeof(GateIoAlphaAsset[]))]
+    [JsonSerializable(typeof(GateIoAlphaTicker[]))]
+    [JsonSerializable(typeof(GateIoAlphaQuote))]
+    [JsonSerializable(typeof(GateIoAlphaOrderResult))]
+    [JsonSerializable(typeof(GateIoAlphaOrder))]
+    [JsonSerializable(typeof(GateIoAlphaOrder[]))]
+
     [JsonSerializable(typeof(GateIoSocketRequest<string[]>))]
     [JsonSerializable(typeof(GateIoSocketRequest<GateIoSocketRequestWrapper<GateIoFuturesPlaceOrderRequest>>))]
     [JsonSerializable(typeof(GateIoSocketRequest<GateIoSocketRequestWrapper<GateIoFuturesPlaceOrderRequest[]>>))]
@@ -36,6 +45,7 @@ namespace GateIo.Net.Converters
     // End manual defined attributes
     [JsonSerializable(typeof(GateIoSocketAuthRequest<string[]>))]
     [JsonSerializable(typeof(GateIoSocketResponse<string[]>))]
+    [JsonSerializable(typeof(GateIoSocketMessage<GateIoAdlUpdate[]>))]
     [JsonSerializable(typeof(GateIoSocketMessage<GateIoPerpOrder[]>))]
     [JsonSerializable(typeof(GateIoSocketMessage<GateIoPerpUserTrade[]>))]
     [JsonSerializable(typeof(GateIoSocketMessage<GateIoPerpLiquidation[]>))]
@@ -114,6 +124,7 @@ namespace GateIo.Net.Converters
     [JsonSerializable(typeof(GateIoLoanMarginTier[]))]
     [JsonSerializable(typeof(GateIoLoanMarginTierEntry[]))]
     [JsonSerializable(typeof(GateIoLoanRecord[]))]
+    [JsonSerializable(typeof(GateIoIsolatedMarginAccount[]))]
     [JsonSerializable(typeof(GateIoMarginAccount[]))]
     [JsonSerializable(typeof(GateIoMarginAccountAsset[]))]
     [JsonSerializable(typeof(GateIoMarginAutoRepayStatus[]))]

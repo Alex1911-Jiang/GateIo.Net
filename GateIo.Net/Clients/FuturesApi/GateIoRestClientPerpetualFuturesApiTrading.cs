@@ -9,6 +9,7 @@ using System.Threading;
 using GateIo.Net.Enums;
 using System;
 using System.Linq;
+using CryptoExchange.Net;
 
 namespace GateIo.Net.Clients.FuturesApi
 {
@@ -26,10 +27,10 @@ namespace GateIo.Net.Clients.FuturesApi
         #region Get Positions
 
         /// <inheritdoc />
-        public async Task<WebCallResult<GateIoPosition[]>> GetPositionsAsync(string settlementAsset, bool? holding = null, int? page = null, int? limit = null, CancellationToken ct = default)
+        public async Task<WebCallResult<GateIoPosition[]>> GetPositionsAsync(string settlementAsset, bool? holding = null, int? offset = null, int? limit = null, CancellationToken ct = default)
         {
             var parameters = new ParameterCollection();
-            parameters.AddOptional("page", page);
+            parameters.AddOptional("offset", offset);
             parameters.AddOptional("limit", limit);
             parameters.AddOptional("holding", holding);
             var request = _definitions.GetOrCreate(HttpMethod.Get, $"/api/v4/futures/{settlementAsset.ToLowerInvariant()}/positions", GateIoExchange.RateLimiter.RestFuturesOther, 1, true);
@@ -173,7 +174,15 @@ namespace GateIo.Net.Clients.FuturesApi
             parameters.AddOptional("auto_size", closeSide);
             parameters.AddOptional("stp_act", stpMode);
             var request = _definitions.GetOrCreate(HttpMethod.Post, $"/api/v4/futures/{settlementAsset.ToLowerInvariant()}/orders", GateIoExchange.RateLimiter.RestFuturesOrderPlacement, 1, true);
-            return await _baseClient.SendAsync<GateIoPerpOrder>(request, parameters, ct, 1, new Dictionary<string, string> { { "X-Gate-Channel-Id", _baseClient._brokerId } }).ConfigureAwait(false);
+            return await _baseClient.SendAsync<GateIoPerpOrder>(
+                request, 
+                parameters, 
+                ct, 
+                1, 
+                new Dictionary<string, string> 
+                { 
+                    { "X-Gate-Channel-Id", LibraryHelpers.GetClientReference(() => _baseClient.ClientOptions.BrokerId, _baseClient.Exchange) } 
+                }).ConfigureAwait(false);
         }
 
         #endregion
@@ -189,7 +198,14 @@ namespace GateIo.Net.Clients.FuturesApi
             var parameters = new ParameterCollection();
             parameters.SetBody(orders.ToArray());
             var request = _definitions.GetOrCreate(HttpMethod.Post, $"/api/v4/futures/{settlementAsset.ToLowerInvariant()}/batch_orders", GateIoExchange.RateLimiter.RestFuturesOrderPlacement, 1, true);
-            var result = await _baseClient.SendAsync<GateIoPerpOrder[]>(request, parameters, ct, 1, new Dictionary<string, string> { { "X-Gate-Channel-Id", _baseClient._brokerId } }).ConfigureAwait(false);
+            var result = await _baseClient.SendAsync<GateIoPerpOrder[]>(
+                request,
+                parameters,
+                ct, 
+                1,
+                new Dictionary<string, string> {
+                    { "X-Gate-Channel-Id", LibraryHelpers.GetClientReference(() => _baseClient.ClientOptions.BrokerId, _baseClient.Exchange) }
+                }).ConfigureAwait(false);
             return result;
         }
 
@@ -513,7 +529,15 @@ namespace GateIo.Net.Clients.FuturesApi
             parameters.AddOptionalEnum("order_type", triggerOrderType);
 
             var request = _definitions.GetOrCreate(HttpMethod.Post, $"/api/v4/futures/{settlementAsset.ToLowerInvariant()}/price_orders", GateIoExchange.RateLimiter.RestFuturesOrderPlacement, 1, true);
-            return await _baseClient.SendAsync<GateIoId>(request, parameters, ct, 1, new Dictionary<string, string> { { "X-Gate-Channel-Id", _baseClient._brokerId } }).ConfigureAwait(false);
+            return await _baseClient.SendAsync<GateIoId>(
+                request,
+                parameters, 
+                ct,
+                1,
+                new Dictionary<string, string> 
+                {
+                    { "X-Gate-Channel-Id", LibraryHelpers.GetClientReference(() => _baseClient.ClientOptions.BrokerId, _baseClient.Exchange) }
+                }).ConfigureAwait(false);
         }
 
         #endregion

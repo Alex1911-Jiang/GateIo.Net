@@ -461,6 +461,9 @@
         <member name="T:GateIo.Net.Clients.GateIoUserClientProvider">
             <inheritdoc />
         </member>
+        <member name="P:GateIo.Net.Clients.GateIoUserClientProvider.ExchangeName">
+            <inheritdoc />
+        </member>
         <member name="M:GateIo.Net.Clients.GateIoUserClientProvider.#ctor(System.Action{GateIo.Net.Objects.Options.GateIoOptions})">
             <summary>
             ctor
@@ -4475,6 +4478,21 @@
             Waiting for confirmations
             </summary>
         </member>
+        <member name="F:GateIo.Net.Enums.WithdrawalStatus.Blocked">
+            <summary>
+            Rejected
+            </summary>
+        </member>
+        <member name="F:GateIo.Net.Enums.WithdrawalStatus.Credited">
+            <summary>
+            Deposit credited
+            </summary>
+        </member>
+        <member name="F:GateIo.Net.Enums.WithdrawalStatus.Final">
+            <summary>
+            Funds added to spot account
+            </summary>
+        </member>
         <member name="T:GateIo.Net.ExtensionMethods.GateIoExtensionMethods">
             <summary>
             Extension methods specific to using the Gate API
@@ -4583,6 +4601,11 @@
         <member name="P:GateIo.Net.GateIoExchange.Type">
             <summary>
             Type of exchange
+            </summary>
+        </member>
+        <member name="P:GateIo.Net.GateIoExchange.AssetAliases">
+            <summary>
+            Aliases for Gate assets
             </summary>
         </member>
         <member name="M:GateIo.Net.GateIoExchange.FormatSymbol(System.String,System.String,CryptoExchange.Net.SharedApis.TradingMode,System.Nullable{System.DateTime})">
@@ -5159,7 +5182,7 @@
             </summary>
             <param name="settlementAsset">The settlement asset. btc, usdt or usd</param>
             <param name="holding">True to return only active positions, false to return all</param>
-            <param name="page">Page number</param>
+            <param name="offset">Result offset</param>
             <param name="limit">Max amount of results</param>
             <param name="ct">Cancellation token</param>
             <returns></returns>
@@ -13857,6 +13880,9 @@
             <summary>
             GateIo order book factory
             </summary>
+        </member>
+        <member name="P:GateIo.Net.SymbolOrderBooks.GateIoOrderBookFactory.ExchangeName">
+            <inheritdoc />
         </member>
         <member name="M:GateIo.Net.SymbolOrderBooks.GateIoOrderBookFactory.#ctor(System.IServiceProvider)">
             <summary>

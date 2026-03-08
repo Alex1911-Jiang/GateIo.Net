@@ -12,8 +12,8 @@ namespace GateIo.Net.Clients
     /// <inheritdoc />
     public class GateIoUserClientProvider : IGateIoUserClientProvider
     {
-        private static ConcurrentDictionary<string, IGateIoRestClient> _restClients = new ConcurrentDictionary<string, IGateIoRestClient>();
-        private static ConcurrentDictionary<string, IGateIoSocketClient> _socketClients = new ConcurrentDictionary<string, IGateIoSocketClient>();
+        private ConcurrentDictionary<string, IGateIoRestClient> _restClients = new ConcurrentDictionary<string, IGateIoRestClient>();
+        private ConcurrentDictionary<string, IGateIoSocketClient> _socketClients = new ConcurrentDictionary<string, IGateIoSocketClient>();
 
         private readonly IOptions<GateIoRestOptions> _restOptions;
         private readonly IOptions<GateIoSocketOptions> _socketOptions;
@@ -42,6 +42,7 @@ namespace GateIo.Net.Clients
             IOptions<GateIoSocketOptions> socketOptions)
         {
             _httpClient = httpClient ?? new HttpClient();
+            _httpClient.Timeout = restOptions.Value.RequestTimeout;
             _loggerFactory = loggerFactory;
             _restOptions = restOptions;
             _socketOptions = socketOptions;
@@ -64,7 +65,7 @@ namespace GateIo.Net.Clients
         /// <inheritdoc />
         public IGateIoRestClient GetRestClient(string userIdentifier, ApiCredentials? credentials = null, GateIoEnvironment? environment = null)
         {
-            if (!_restClients.TryGetValue(userIdentifier, out var client))
+            if (!_restClients.TryGetValue(userIdentifier, out var client) || client.Disposed)
                 client = CreateRestClient(userIdentifier, credentials, environment);
 
             return client;
@@ -73,7 +74,7 @@ namespace GateIo.Net.Clients
         /// <inheritdoc />
         public IGateIoSocketClient GetSocketClient(string userIdentifier, ApiCredentials? credentials = null, GateIoEnvironment? environment = null)
         {
-            if (!_socketClients.TryGetValue(userIdentifier, out var client))
+            if (!_socketClients.TryGetValue(userIdentifier, out var client) || client.Disposed)
                 client = CreateSocketClient(userIdentifier, credentials, environment);
 
             return client;

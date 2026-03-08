@@ -31,7 +31,7 @@ namespace GateIo.Net
 
             var timestamp = GetMillisecondTimestampLong(apiClient) / 1000;
             var requestBody = request.BodyParameters?.Count > 0 ? GetSerializedBody(_serializer, request.BodyParameters) : string.Empty;
-            var queryString = request.QueryParameters?.Count > 0 ? request.GetQueryString(true) : string.Empty;
+            var queryString = request.QueryParameters?.Count > 0 ? request.GetQueryString(false) : string.Empty;
             var bodyPayload = SignSHA512(requestBody).ToLowerInvariant();
 
             var signStr = $"{request.Method}\n{request.Path}\n{queryString}\n{bodyPayload}\n{timestamp}";
@@ -51,9 +51,10 @@ namespace GateIo.Net
             if (context?.ContainsKey("channel") == true)
             {
                 var channel = (string)context["channel"]!;
-                var query = new GateIoAuthQuery<GateIoSubscriptionResponse>(apiClient, channel, "subscribe", (string[]?)context["payload"]);
+                var type = (string)context["type"]!;
+                var query = new GateIoAuthQuery<GateIoSubscriptionResponse>(apiClient, channel, type, (string[]?)context["payload"]);
                 var request = (GateIoSocketAuthRequest<string[]>)query.Request;
-                var sign = SignHMACSHA512($"channel={channel}&event=subscribe&time={request.Timestamp}").ToLowerInvariant();
+                var sign = SignHMACSHA512($"channel={channel}&event={type}&time={request.Timestamp}").ToLowerInvariant();
                 request.Auth = new GateIoSocketAuth { Key = ApiKey, Sign = sign, Method = "api_key" };
                 return query;
             }

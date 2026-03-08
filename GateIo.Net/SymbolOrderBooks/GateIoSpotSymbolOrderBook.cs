@@ -56,7 +56,9 @@ namespace GateIo.Net.SymbolOrderBooks
             Initialize(options);
 
             _strictLevels = false;
-            _sequencesAreConsecutive = options?.Limit == null;
+            _sequencesAreConsecutive = true;
+            _skipSequenceCheckFirstUpdateAfterSnapshotSet = true;
+
             _updateInterval = options?.UpdateInterval;
 
             Levels = options?.Limit;
@@ -86,9 +88,18 @@ namespace GateIo.Net.SymbolOrderBooks
             }
 
             Status = OrderBookStatus.Syncing;
-            if (Levels == null)
-                // Small delay to make sure the snapshot is from after our first stream update
-                await Task.Delay(200).ConfigureAwait(false);
+
+            if (Levels != null)
+            {
+                var setResult = await WaitForSetOrderBookAsync(_initialDataTimeout, ct).ConfigureAwait(false);
+                if (!setResult)
+                    await subResult.Data.CloseAsync().ConfigureAwait(false);
+
+                return setResult ? subResult : new CallResult<UpdateSubscription>(setResult.Error!);
+            }
+
+            // Wait up to 1s until the first update has been received
+            await WaitUntilFirstUpdateBufferedAsync(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(1000), ct).ConfigureAwait(false);
 
             var bookResult = await _restClient.SpotApi.ExchangeData.GetOrderBookAsync(Symbol, null, Levels ?? 100).ConfigureAwait(false);
             if (!bookResult)
@@ -98,7 +109,7 @@ namespace GateIo.Net.SymbolOrderBooks
                 return new CallResult<UpdateSubscription>(bookResult.Error!);
             }
 
-            SetInitialOrderBook(bookResult.Data.Id, bookResult.Data.Bids, bookResult.Data.Asks);
+            SetSnapshot(bookResult.Data.Id, bookResult.Data.Bids, bookResult.Data.Asks);
             return new CallResult<UpdateSubscription>(subResult.Data);
         }
 
@@ -109,7 +120,7 @@ namespace GateIo.Net.SymbolOrderBooks
 
         private void HandleUpdate(DataEvent<GateIoPartialOrderBookUpdate> data)
         {
-            SetInitialOrderBook(data.Data.LastUpdateId, data.Data.Bids, data.Data.Asks, data.DataTime, data.DataTimeLocal);
+            SetSnapshot(data.Data.LastUpdateId, data.Data.Bids, data.Data.Asks, data.DataTime, data.DataTimeLocal);
         }
 
         /// <inheritdoc />
@@ -123,11 +134,13 @@ namespace GateIo.Net.SymbolOrderBooks
             if (Levels != null)
                 return await WaitForSetOrderBookAsync(_initialDataTimeout, ct).ConfigureAwait(false);
 
+            // Wait up to 1s until the first update has been received
+            await WaitUntilFirstUpdateBufferedAsync(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(1000), ct).ConfigureAwait(false);
             var bookResult = await _restClient.SpotApi.ExchangeData.GetOrderBookAsync(Symbol, null, Levels ?? 100).ConfigureAwait(false);
             if (!bookResult)
                 return new CallResult<bool>(bookResult.Error!);
 
-            SetInitialOrderBook(bookResult.Data.Id, bookResult.Data.Bids, bookResult.Data.Asks);
+            SetSnapshot(bookResult.Data.Id, bookResult.Data.Bids, bookResult.Data.Asks);
             return new CallResult<bool>(true);
         }
 

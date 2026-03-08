@@ -35,15 +35,6 @@ namespace GateIo.Net.Clients.SpotApi
     internal partial class GateIoSocketClientSpotApi : SocketApiClient, IGateIoSocketClientSpotApi
     {
         #region fields
-        private static readonly MessagePath _idPath = MessagePath.Get().Property("id");
-        private static readonly MessagePath _channelPath = MessagePath.Get().Property("channel");
-        private static readonly MessagePath _symbolPath = MessagePath.Get().Property("result").Property("currency_pair");
-        private static readonly MessagePath _symbolPath2 = MessagePath.Get().Property("result").Property("s");
-        private static readonly MessagePath _klinePath = MessagePath.Get().Property("result").Property("n");
-        private static readonly MessagePath _idPath2 = MessagePath.Get().Property("request_id");
-        private static readonly MessagePath _ackPath = MessagePath.Get().Property("ack");
-        private static readonly MessagePath _statusPath = MessagePath.Get().Property("header").Property("status");
-
         private readonly bool _demoTrading;
 
         private new GateIoSocketOptions ClientOptions => (GateIoSocketOptions)base.ClientOptions;
@@ -81,8 +72,6 @@ namespace GateIo.Net.Clients.SpotApi
 
         /// <inheritdoc />
         protected override IMessageSerializer CreateSerializer() => new SystemTextJsonMessageSerializer(SerializerOptions.WithConverters(GateIoExchange._serializerContext));
-        /// <inheritdoc />
-        protected override IByteMessageAccessor CreateAccessor(WebSocketMessageType type) => new SystemTextJsonByteMessageAccessor(SerializerOptions.WithConverters(GateIoExchange._serializerContext));
 
         public override ISocketMessageHandler CreateMessageConverter(WebSocketMessageType messageType) => new GateIoSocketSpotMessageHandler();
 
@@ -461,6 +450,7 @@ namespace GateIo.Net.Clients.SpotApi
             SelfTradePreventionMode? selfTradePreventionMode = null,
             string? text = null,
             OrderActionMode? actionMode = null,
+            decimal? slippage = null,
             CancellationToken ct = default)
         {
             var id = ExchangeHelpers.NextId();
@@ -478,7 +468,8 @@ namespace GateIo.Net.Clients.SpotApi
                 AutoRepay = autoRepay,
                 StpMode = selfTradePreventionMode,
                 Text = text ?? "t-" + ExchangeHelpers.RandomString(20),
-                ActionMode = actionMode
+                ActionMode = actionMode,
+                Slippage = slippage
             }, true,
             new Dictionary<string, string>
             {
@@ -505,7 +496,8 @@ namespace GateIo.Net.Clients.SpotApi
                 Quantity = o.Quantity,
                 Side = o.Side,
                 StpMode = o.SelfTradePreventionMode,
-                Symbol = o.Symbol
+                Symbol = o.Symbol,
+                Slippage = o.Slippage
             }).ToArray(), true,
             new Dictionary<string, string>
             {
@@ -614,49 +606,6 @@ namespace GateIo.Net.Clients.SpotApi
         }
 
         private string GetSocketPath() => $"{(!_demoTrading ? "ws/v4" : "v4/ws/spot")}";
-
-        /// <inheritdoc />
-        public override string? GetListenerIdentifier(IMessageAccessor message)
-        {
-            var id = message.GetValue<long?>(_idPath);
-            if (id != null)
-                return id.ToString();
-
-            var id2 = message.GetValue<string?>(_idPath2);
-            if (id2 != null)
-            {
-                if (message.GetValue<bool?>(_ackPath) == true
-                    && message.GetValue<string>(_statusPath) == "200")
-                {
-                    return id2 + "ack";
-                }
-
-                return id2;
-            }
-
-            var channel = message.GetValue<string>(_channelPath);
-
-            if (string.Equals(channel, "spot.obu"))
-                return message.GetValue<string>(_symbolPath2);
-
-            if (string.Equals(channel, "spot.trades")
-                || string.Equals(channel, "spot.tickers"))
-            {
-                return channel + "." + message.GetValue<string>(_symbolPath);
-            }
-
-            if (string.Equals(channel, "spot.candlesticks"))
-                return channel + "." + message.GetValue<string>(_klinePath);
-
-            if (string.Equals(channel, "spot.book_ticker")
-             || string.Equals(channel, "spot.order_book_update")
-             || string.Equals(channel, "spot.order_book"))
-            {
-                return channel + "." + message.GetValue<string>(_symbolPath2);
-            }
-
-            return channel;
-        }
 
         /// <inheritdoc />
         public override string FormatSymbol(string baseAsset, string quoteAsset, TradingMode tradingMode, DateTime? deliverTime = null)

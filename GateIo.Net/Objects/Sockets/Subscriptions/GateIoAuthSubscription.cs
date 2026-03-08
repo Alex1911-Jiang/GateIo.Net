@@ -28,7 +28,6 @@ namespace GateIo.Net.Objects.Sockets.Subscriptions
             _channel = channel;
             _payload = payload;
 
-            MessageMatcher = MessageMatcher.Create<GateIoSocketMessage<T>>(identifiers, DoHandleMessage);
             MessageRouter = MessageRouter.CreateWithoutTopicFilter<GateIoSocketMessage<T>>(identifiers, DoHandleMessage);
         }
 
@@ -38,14 +37,20 @@ namespace GateIo.Net.Objects.Sockets.Subscriptions
             return connection.ApiClient.AuthenticationProvider!.GetAuthenticationQuery(_client, connection, new Dictionary<string, object?>
             {
                 { "channel", _channel },
+                { "type", "subscribe" },
                 { "payload", _payload }
             });
         }
 
         /// <inheritdoc />
         protected override Query? GetUnsubQuery(SocketConnection connection)
-        { 
-            return new GateIoQuery<string[], GateIoSubscriptionResponse>(_client, ExchangeHelpers.NextId(), _channel, "unsubscribe", _payload);
+        {
+            return connection.ApiClient.AuthenticationProvider!.GetAuthenticationQuery(_client, connection, new Dictionary<string, object?>
+            {
+                { "channel", _channel },
+                { "type", "unsubscribe" },
+                { "payload", _payload }
+            });
         }
 
         /// <inheritdoc />

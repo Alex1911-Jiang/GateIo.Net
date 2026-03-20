@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using CryptoExchange.Net.Objects;
@@ -13,19 +13,29 @@ namespace GateIo.Net.Interfaces.Clients.AlphaApi
     {
         /// <summary>
         /// Get account info
-        /// <para><a href="https://www.gate.com/docs/developers/alpha/en/#alpha-account-api" /></para>
+        /// <para>
+        /// Docs:<br />
+        /// <a href="https://www.gate.com/docs/developers/alpha/en/#alpha-account-api" /><br />
+        /// Endpoint:<br />
+        /// /api/v4/alpha/accounts
+        /// </para>
         /// </summary>
         /// <param name="ct">Cancellation token</param>
         Task<WebCallResult<GateIoAlphaAccount[]>> GetAccountInfoAsync(CancellationToken ct = default);
 
         /// <summary>
         /// Get account ledger
-        /// <para><a href="https://www.gate.com/docs/developers/alpha/en/#alpha-account-transaction-history-api" /></para>
+        /// <para>
+        /// Docs:<br />
+        /// <a href="https://www.gate.com/docs/developers/alpha/en/#alpha-account-transaction-history-api" /><br />
+        /// Endpoint:<br />
+        /// /api/v4/alpha/account_book
+        /// </para>
         /// </summary>
-        /// <param name="startTime">Filter by start time</param>
-        /// <param name="endTime">Filter by end time</param>
-        /// <param name="page">Page number</param>
-        /// <param name="limit">Max number of results</param>
+        /// <param name="startTime">["<c>from</c>"] Filter by start time</param>
+        /// <param name="endTime">["<c>to</c>"] Filter by end time</param>
+        /// <param name="page">["<c>page</c>"] Page number</param>
+        /// <param name="limit">["<c>limit</c>"] Max number of results</param>
         /// <param name="ct">Cancellation token</param>
         Task<WebCallResult<GateIoAlphaLedgerEntry[]>> GetLedgerAsync(
             DateTime? startTime = null,

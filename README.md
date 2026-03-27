@@ -46,22 +46,38 @@ The NuGet package files are added along side the source with the latest GitHub r
 
 
 ## How to use
-* REST Endpoints
-	```csharp
-	// Get the ETH/USDT ticker via rest request
-	var restClient = new GateIoRestClient();
-	var tickerResult = await restClient.SpotApi.ExchangeData.GetTickersAsync("ETH_USDT");
-	var lastPrice = tickerResult.Data.First().LastPrice;
-	```
-* Websocket streams
-	```csharp
-	// Subscribe to ETH/USDT ticker updates via the websocket API
-	var socketClient = new GateIoSocketClient();
-	var tickerSubscriptionResult = socketClient.SpotApi.SubscribeToTickerUpdatesAsync("ETH_USDT", data =>
-	{
-		var lastPrice = data.Data.LastPrice;
-	});
-	```
+*Basic request:*
+```csharp
+// Get the ETH/USDT ticker via rest request
+var restClient = new GateIoRestClient();
+var tickerResult = await restClient.SpotApi.ExchangeData.GetTickersAsync("ETH_USDT");
+var lastPrice = tickerResult.Data.First().LastPrice;
+```
+
+*Place order:*
+```csharp
+var restClient = new GateIoRestClient(opts => {
+	opts.ApiCredentials = new GateIoCredentials("APIKEY", "APISECRET");
+});
+
+// Place Limit order to go long for 10 contracts of ETH/USDT at 2000
+var orderResult = await restClient.PerpetualFuturesApi.Trading.PlaceOrderAsync(
+    "usdt",
+    "ETH_USDT",
+    OrderSide.Buy,
+    10,
+    price: 2000);
+```
+
+*WebSocket subscription:*
+```csharp
+// Subscribe to ETH/USDT ticker updates via the websocket API
+var socketClient = new GateIoSocketClient();
+var tickerSubscriptionResult = socketClient.SpotApi.SubscribeToTickerUpdatesAsync("ETH_USDT", data =>
+{
+	var lastPrice = data.Data.LastPrice;
+});
+```
 
 For information on the clients, dependency injection, response processing and more see the [documentation](https://cryptoexchange.jkorf.dev?library=GateIo.Net), or have a look at the examples [here](https://github.com/JKorf/GateIo.Net/tree/main/Examples) or [here](https://github.com/JKorf/CryptoExchange.Net/tree/master/Examples).
 
@@ -175,6 +191,17 @@ Make a one time donation in a crypto currency of your choice. If you prefer to d
 Alternatively, sponsor me on Github using [Github Sponsors](https://github.com/sponsors/JKorf).
 
 ## Release notes
+* Version 3.10.1 - 24 Mar 2026
+    * Fix issue in credentials copying
+
+* Version 3.10.0 - 24 Mar 2026
+    * Updated CryptoExchange.Net to version 11.0.1, see https://github.com/JKorf/CryptoExchange.Net/releases/ for full release notes
+    * Updated class for supplying API credentials from ApiCredentials to GateIoCredentials
+    * Updated Shared order status parsing to default to Unknown value if not parsable
+
+    * Notes for updating:
+        * Update ApiCredentials to GateIoCredentials for authentication, i.e. `ApiCredentials = new ApiCredentials(..)` => `ApiCredentials = new GateIoCredentials(..)`
+
 * Version 3.9.0 - 09 Mar 2026
     * Added MarketCap, TotalSupply properties to GateIoAsset model
     * Added FundingImpactValue property to GateIoSymbol model
